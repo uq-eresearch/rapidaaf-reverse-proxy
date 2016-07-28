@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -e
+set -ex
 
 # Import any extra environment we might need
 if [[ -f /dit4c/env.sh ]]; then
