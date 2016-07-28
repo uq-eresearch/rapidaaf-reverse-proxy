@@ -56,4 +56,6 @@ export CLIENT_SECRET=$(jwt -k $DIT4C_INSTANCE_PRIVATE_KEY \
     iss=$DIT4C_INSTANCE_JWT_ISS \
     kid=$DIT4C_INSTANCE_JWT_KID)
 
+/opt/bin/nginx_prestart.sh
+
 exec /usr/local/openresty/nginx/sbin/nginx -c /etc/nginx/nginx.conf
