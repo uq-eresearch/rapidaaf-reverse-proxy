@@ -9,7 +9,7 @@ RKT_VERSION=1.11.0
 dist/SHA512SUM: dist/dit4c-helper-auth-portal.linux.amd64.aci
 	sha512sum $^ | sed -e 's/dist\///' > dist/SHA512SUM
 
-dist/dit4c-helper-auth-portal.linux.amd64.aci: build/acbuild build/openresty-openresty-latest-alpine.aci build/jwt bin/* etc/* | dist
+dist/dit4c-helper-auth-portal.linux.amd64.aci: build/acbuild build/openresty-openresty-latest-alpine.aci build/jwt bin/* $(shell find etc -type f) | dist
 	rm -rf .acbuild
 	$(ACBUILD) --debug begin ./build/openresty-openresty-latest-alpine.aci
 	$(ACBUILD) copy etc/nginx /etc/nginx
