@@ -1,15 +1,26 @@
-.DEFAULT_GOAL := dist/SHA512SUM
-.PHONY: clean test
+.DEFAULT_GOAL := dist/dit4c-helper-auth-portal.linux.amd64.aci
+.PHONY: clean test deploy
+
+GPG=gpg2
 
 ACBUILD_VERSION=0.3.1
 ACBUILD=build/acbuild
 DOCKER2ACI_VERSION=0.12.0
 RKT_VERSION=1.11.0
+IMAGE=dist/dit4c-helper-auth-portal.linux.amd64.aci
 
-dist/SHA512SUM: dist/dit4c-helper-auth-portal.linux.amd64.aci
-	sha512sum $^ | sed -e 's/dist\///' > dist/SHA512SUM
+deploy: $(IMAGE) $(IMAGE).asc
 
-dist/dit4c-helper-auth-portal.linux.amd64.aci: build/acbuild build/openresty-openresty-latest-alpine.aci build/jwt bin/* $(shell find etc -type f) | dist
+dist/%.aci.asc: dist/%.aci signing.key
+	$(eval TMP_PUBLIC_KEYRING := $(shell mktemp -p ./build))
+	$(eval TMP_SECRET_KEYRING := $(shell mktemp -p ./build))
+	$(eval GPG_FLAGS := --batch --no-default-keyring --keyring $(TMP_PUBLIC_KEYRING) --secret-keyring $(TMP_SECRET_KEYRING) )
+	$(GPG) $(GPG_FLAGS) --import signing.key
+	rm -f $@
+	$(GPG) $(GPG_FLAGS) --armour --detach-sign $<
+	rm $(TMP_PUBLIC_KEYRING) $(TMP_SECRET_KEYRING)
+
+$(IMAGE): build/acbuild build/openresty-openresty-latest-alpine.aci build/jwt bin/* $(shell find etc -type f) | dist
 	rm -rf .acbuild
 	$(ACBUILD) --debug begin ./build/openresty-openresty-latest-alpine.aci
 	$(ACBUILD) copy etc/nginx /etc/nginx

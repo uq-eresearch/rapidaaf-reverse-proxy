@@ -2,13 +2,16 @@ sudo: required
 dist: trusty
 language: generic
 script: make && make test
+before_deploy:
+- openssl aes-256-cbc -K $encrypted_598921e204e5_key -iv $encrypted_598921e204e5_iv -in signing.key.enc -out signing.key -d
+- make deploy
 deploy:
   provider: releases
   api_key:
     secure: aqZ4w7/Hvaq+xSAiiPbWjN5FPyUK6j+XgIwSUhG+ogW+xrHJ7dvnYC3dMUDvbjTFtCAlctw6pa5sLJ50k93MqKtXzcHKCBdjuhaSPlBtIH8ICAXD6bLgGXPLDrcvaihCxbnzQeaWk+8E5uaULgeF2QS+4OdDOkFmY3KJJf2Tz5Ox/1CfDXlaHCKZFiOxCD6DiydKhj8m12A9X65SCCUoaHXJJyMnxGPZRNDXhV6Up7uBuRVREwd8vjfx3aF4fRn6ir8Sj2pwAbvNOR6GGybbOlMi0ATJsAaJV8ov4F8MyKKV9S7tXvbXpDKFM+24KAN20LTyJVUB8DFZdWUNUxUiC0asW33tNp7eEBfpW+R+riH6Dh8yw39ie6iGfChDYyGz7araSG8WTUv/UAHak3d5ChCtTvUHZPsiOR1hP+coKc4PyJKAh/2Ue1yQgFiyxzYJ0PEHZ/AeIy8n96P+82Aw05LwvW/e0tDD3tkYeIsBO5vImFtgTRz/fvIwUny4LlkAsQuMP50Yy8T5IVGmsjFzbaSlEmVqdp+a+kFfoFvmdgF83RFU73QNkLfh1dJb/tSNRNhugwo3kKZ5w77/XkQTaLh1wzB4Vn/b+s5t+CyTRREy1Y3SkL7e9F646nAqp2Xl3f22IXnYMFUucTwGP7P0LR48nI9BGfas8Nwv7cMo9VQ=
   file:
-    - dist/dit4c-helper-auth-portal.linux.amd64.aci
-    - dist/SHA512SUM
+  - dist/dit4c-helper-auth-portal.linux.amd64.aci
+  - dist/dit4c-helper-auth-portal.linux.amd64.aci.asc
   skip_cleanup: true
   on:
     tags: true
