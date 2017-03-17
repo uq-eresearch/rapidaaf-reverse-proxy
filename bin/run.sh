@@ -19,13 +19,13 @@ if [[ "$LISTEN_PORT" == "" ]]; then
   exit 1
 fi
 
-if [[ "$TARGET_HOST" == "" ]]; then
-  echo "Must specify TARGET_HOST for authorized traffic"
+if [[ "$UPSTREAM_HOST" == "" ]]; then
+  echo "Must specify UPSTREAM_HOST for authorized traffic"
   exit 1
 fi
 
-if [[ "$TARGET_PORT" == "" ]]; then
-  echo "Must specify TARGET_PORT for authorized traffic"
+if [[ "$UPSTREAM_PORT" == "" ]]; then
+  echo "Must specify UPSTREAM_PORT for authorized traffic"
   exit 1
 fi
 

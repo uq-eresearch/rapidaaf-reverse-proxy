@@ -28,8 +28,8 @@ $(IMAGE): build/acbuild build/openresty-openresty-latest-alpine.aci bin/* $(shel
 	$(ACBUILD) copy etc/nginx /etc/nginx
 	$(ACBUILD) environment add LISTEN_HOST ""
 	$(ACBUILD) environment add LISTEN_PORT ""
-	$(ACBUILD) environment add TARGET_HOST ""
-	$(ACBUILD) environment add TARGET_PORT ""
+	$(ACBUILD) environment add UPSTREAM_HOST ""
+	$(ACBUILD) environment add UPSTREAM_PORT ""
 	$(ACBUILD) environment add PASSWORD_SECRET ""
 	$(ACBUILD) copy bin /opt/bin
 	$(ACBUILD) set-name $(NAME)
