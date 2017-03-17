@@ -1,13 +1,15 @@
-.DEFAULT_GOAL := dist/dit4c-helper-auth-portal.linux.amd64.aci
+NAME=password-reverse-proxy
+IMAGE=dist/$(NAME).linux.amd64.aci
+
+.DEFAULT_GOAL := $(IMAGE)
 .PHONY: clean test deploy
 
 GPG=gpg2
 
-ACBUILD_VERSION=0.3.1
+ACBUILD_VERSION=0.4.0
 ACBUILD=build/acbuild
-DOCKER2ACI_VERSION=0.12.0
-RKT_VERSION=1.11.0
-IMAGE=dist/dit4c-helper-auth-portal.linux.amd64.aci
+DOCKER2ACI_VERSION=0.16.0
+RKT_VERSION=1.25.0
 
 deploy: $(IMAGE) $(IMAGE).asc
 
@@ -20,23 +22,19 @@ dist/%.aci.asc: dist/%.aci signing.key
 	$(GPG) $(GPG_FLAGS) --armour --detach-sign $<
 	rm $(TMP_PUBLIC_KEYRING) $(TMP_SECRET_KEYRING)
 
-$(IMAGE): build/acbuild build/openresty-openresty-latest-alpine.aci build/jwt bin/* $(shell find etc -type f) | dist
+$(IMAGE): build/acbuild build/openresty-openresty-latest-alpine.aci bin/* $(shell find etc -type f) | dist
 	rm -rf .acbuild
 	$(ACBUILD) --debug begin ./build/openresty-openresty-latest-alpine.aci
 	$(ACBUILD) copy etc/nginx /etc/nginx
-	$(ACBUILD) copy build/jwt /usr/bin/jwt
-	$(ACBUILD) environment add DIT4C_INSTANCE_PRIVATE_KEY ""
-	$(ACBUILD) environment add DIT4C_INSTANCE_JWT_KID ""
-	$(ACBUILD) environment add DIT4C_INSTANCE_JWT_ISS ""
-	$(ACBUILD) environment add DIT4C_INSTANCE_HELPER_AUTH_HOST ""
-	$(ACBUILD) environment add DIT4C_INSTANCE_HELPER_AUTH_PORT ""
-	$(ACBUILD) environment add DIT4C_INSTANCE_HTTP_PORT ""
-	$(ACBUILD) environment add DIT4C_INSTANCE_OAUTH_AUTHORIZE_URL ""
-	$(ACBUILD) environment add DIT4C_INSTANCE_OAUTH_ACCESS_TOKEN_URL ""
+	$(ACBUILD) environment add LISTEN_HOST ""
+	$(ACBUILD) environment add LISTEN_PORT ""
+	$(ACBUILD) environment add TARGET_HOST ""
+	$(ACBUILD) environment add TARGET_PORT ""
+	$(ACBUILD) environment add PASSWORD_SECRET ""
 	$(ACBUILD) copy bin /opt/bin
-	$(ACBUILD) set-name dit4c-helper-auth-portal
+	$(ACBUILD) set-name $(NAME)
 	$(ACBUILD) set-exec -- /opt/bin/run.sh
-	$(ACBUILD) write --overwrite dist/dit4c-helper-auth-portal.linux.amd64.aci
+	$(ACBUILD) write --overwrite $@
 	$(ACBUILD) end
 
 dist:
@@ -44,15 +42,6 @@ dist:
 
 build:
 	mkdir -p build
-
-build/jwt: | build/rkt
-	sudo -v && sudo build/rkt/rkt run --dns=8.8.8.8 --insecure-options=image \
-	  --volume output-dir,kind=host,source=`pwd`/build \
-	  docker://golang:alpine \
-	  --set-env CGO_ENABLED=0 \
-	  --set-env GOOS=linux \
-	  --mount volume=output-dir,target=/output \
-	  --exec /bin/sh --  -c "apk add --update git && /usr/local/go/bin/go get -v --ldflags '-extldflags \"-static\"' github.com/knq/jwt/cmd/jwt && install -t /output -o $(shell id -u) -g $(shell id -g) /go/bin/jwt"
 
 build/openresty-openresty-latest-alpine.aci: build/docker2aci
 	cd build && ./docker2aci docker://openresty/openresty:latest-alpine

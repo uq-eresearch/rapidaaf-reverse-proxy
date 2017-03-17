@@ -2,5 +2,5 @@
 
 set -ex
 
-echo "listen $DIT4C_INSTANCE_HELPER_AUTH_HOST:$DIT4C_INSTANCE_HELPER_AUTH_PORT;" \
+echo "listen $LISTEN_HOST:$LISTEN_PORT;" \
   > /dev/shm/nginx_listen.conf
