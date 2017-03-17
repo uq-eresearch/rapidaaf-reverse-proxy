@@ -66,7 +66,7 @@ build/rkt: | build
 	curl -sL https://github.com/coreos/rkt/releases/download/v${RKT_VERSION}/rkt-v${RKT_VERSION}.tar.gz | tar xz -C build
 	mv build/rkt-v${RKT_VERSION} build/rkt
 
-test: build/bats build/rkt dist/dit4c-helper-auth-portal.linux.amd64.aci
+test: build/bats build/rkt $(IMAGE)
 	sudo -v && echo "" && build/bats/bin/bats --pretty test
 
 clean:

@@ -12,8 +12,8 @@ teardown() {
 @test "has valid nginx config after running /opt/bin/nginx_prestart.sh" {
   run sudo $RKT run --insecure-options=image --stage1-path=$RKT_STAGE1 \
     $IMAGE \
-    --set-env DIT4C_INSTANCE_HELPER_AUTH_HOST=127.1.1.1 \
-    --set-env DIT4C_INSTANCE_HELPER_AUTH_PORT=8081 \
+    --set-env LISTEN_HOST=127.1.1.1 \
+    --set-env LISTEN_PORT=8081 \
     --exec /bin/sh -- -c "/opt/bin/nginx_prestart.sh && /usr/local/openresty/nginx/sbin/nginx -t -c /etc/nginx/nginx.conf"
   echo $output
   [ "$status" -eq 0 ]
