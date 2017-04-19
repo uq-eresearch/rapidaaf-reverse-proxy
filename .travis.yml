@@ -2,17 +2,3 @@ sudo: required
 dist: trusty
 language: generic
 script: make && make test
-before_deploy:
-- openssl aes-256-cbc -K $encrypted_cfc50253bde5_key -iv $encrypted_cfc50253bde5_iv -in signing.key.enc -out signing.key -d
-- make deploy
-deploy:
-  provider: releases
-  api_key:
-    secure: TAlzX49GpB9HMkS/j24cmHcnDmnP0FhEMA/dcobAwzWrEB7HPsliewH/pRp6Vdj9keneic59ppwm8oWdYYd6D5zZt+292bGiA3ZQBwa4HbvnAkYjVWNfdf1RPhxiilVasFFK7rlbJxa7cobI8S1FzCZySKjjYwlhqcsI4ettMxQRxamWrtQ7cKPNuuw54NvSfPtTZvl/S/rc1namgKXHCtWJH4j/gmMjLulSg3pr37UFf/EeQCqXLjzlTLb8ZpgNcHBoMDR0BsiPWrL6BifWoFQUduQ5eL2bsxLmjsQiPbzsPOFD2eQn5yHyiVeY9VEVL75Qrn3wmqsgNtyAxFnPgCNj5Bn8xsfEN4TZB00cB4Nj7Sz849w90PNSzv1/C8DsgBZNFTvKs5ZWi+3G3Ncdv54R9szYY6ZD+Gej1Ch8eftHEqffEGfKJ331NkzOGnuNg3gwTzV9OaaPjyDGq5dBqzQKLMjOnDaNBsABSPoa4bkcTIvHaCkMZrsZQLnni4gB2lr/2w56SWrYmLBFrJ54a2JnTfN8xZjCTohXZd1TZWl7qAsrud28UnQC1MRSnqMDOMaOOb6bOWtyIbejyHxCgw9wmVPrtEqzpTHv0uekPiDHXdBDJYgXDwcxLlEPjsnzOjVqdmbIYXroPTnaSxJ++9z00Zu2Mbh3Y+FgAcGKZ+A=
-  file:
-  - dist/password-reverse-proxy.linux.amd64.aci
-  - dist/password-reverse-proxy.linux.amd64.aci.asc
-  skip_cleanup: true
-  on:
-    tags: true
-    repo: dit4c/password-reverse-proxy

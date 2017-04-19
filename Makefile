@@ -1,5 +1,6 @@
-NAME=password-reverse-proxy
-IMAGE=dist/$(NAME).linux.amd64.aci
+NAME=rapidaaf-reverse-proxy
+DOCKER_IMAGE_FILE=dist/$(NAME).docker
+ACI_IMAGE_FILE=dist/$(NAME).linux.amd64.aci
 
 .DEFAULT_GOAL := $(IMAGE)
 .PHONY: clean test deploy
@@ -11,40 +12,30 @@ ACBUILD=build/acbuild
 DOCKER2ACI_VERSION=0.16.0
 RKT_VERSION=1.25.0
 
-deploy: $(IMAGE) $(IMAGE).asc
+deploy: $(DOCKER_IMAGE_FILE).xz $(ACI_IMAGE_FILE)
 
-dist/%.aci.asc: dist/%.aci signing.key
-	$(eval TMP_PUBLIC_KEYRING := $(shell mktemp -p ./build))
-	$(eval TMP_SECRET_KEYRING := $(shell mktemp -p ./build))
-	$(eval GPG_FLAGS := --batch --no-default-keyring --keyring $(TMP_PUBLIC_KEYRING) --secret-keyring $(TMP_SECRET_KEYRING) )
-	$(GPG) $(GPG_FLAGS) --import signing.key
-	rm -f $@
-	$(GPG) $(GPG_FLAGS) --armour --detach-sign $<
-	rm $(TMP_PUBLIC_KEYRING) $(TMP_SECRET_KEYRING)
+$(DOCKER_IMAGE_FILE).xz: $(DOCKER_IMAGE_FILE)
+	xz -k $(DOCKER_IMAGE_FILE)
 
-$(IMAGE): build/acbuild build/openresty-openresty-latest-alpine.aci bin/* $(shell find etc -type f) | dist
-	rm -rf .acbuild
-	$(ACBUILD) --debug begin ./build/openresty-openresty-latest-alpine.aci
-	$(ACBUILD) copy etc/nginx /etc/nginx
-	$(ACBUILD) environment add LISTEN_HOST ""
-	$(ACBUILD) environment add LISTEN_PORT ""
-	$(ACBUILD) environment add UPSTREAM_HOST ""
-	$(ACBUILD) environment add UPSTREAM_PORT ""
-	$(ACBUILD) environment add PASSWORD_SECRET ""
-	$(ACBUILD) copy bin /opt/bin
-	$(ACBUILD) set-name $(NAME)
-	$(ACBUILD) set-exec -- /opt/bin/run.sh
-	$(ACBUILD) write --overwrite $@
-	$(ACBUILD) end
+$(DOCKER_IMAGE_FILE): build/acbuild $(shell find etc -type f) | dist
+	sudo docker build -t $(NAME) .
+	sudo docker save $(NAME) | cat > $(DOCKER_IMAGE_FILE)
+
+$(ACI_IMAGE_FILE): $(DOCKER_IMAGE_FILE) build/docker2aci $(ACBUILD)
+	sudo rm -rf ./build/library-password-reverse-proxy-latest-alpine.aci .acbuild
+	(cd build && ./docker2aci ../$(DOCKER_IMAGE_FILE))
+	sudo $(ACBUILD) --debug begin ./build/library-$(NAME)-latest.aci
+	sudo $(ACBUILD) set-name $(NAME)
+	sudo $(ACBUILD) label add version latest
+	sudo $(ACBUILD) port add http tcp 8080
+	sudo $(ACBUILD) write --overwrite $@
+	sudo $(ACBUILD) end
 
 dist:
 	mkdir -p dist
 
 build:
 	mkdir -p build
-
-build/openresty-openresty-latest-alpine.aci: build/docker2aci
-	cd build && ./docker2aci docker://openresty/openresty:latest-alpine
 
 $(ACBUILD): | build
 	curl -sL https://github.com/appc/acbuild/releases/download/v${ACBUILD_VERSION}/acbuild-v${ACBUILD_VERSION}.tar.gz | tar xz -C build
@@ -66,7 +57,7 @@ build/rkt: | build
 	curl -sL https://github.com/coreos/rkt/releases/download/v${RKT_VERSION}/rkt-v${RKT_VERSION}.tar.gz | tar xz -C build
 	mv build/rkt-v${RKT_VERSION} build/rkt
 
-test: build/bats build/rkt $(IMAGE)
+test: build/bats build/rkt $(ACI_IMAGE_FILE)
 	sudo -v && echo "" && build/bats/bin/bats --pretty test
 
 clean:
