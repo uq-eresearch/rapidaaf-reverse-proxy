@@ -5,7 +5,7 @@ local username_attribute = ngx.var.username_attribute
 local rapidaaf_secret = ngx.var.rapidaaf_secret
 local rapidaaf_url = ngx.var.rapidaaf_url
 local session_cookie_name = ngx.var.session_cookie_name
-local cookie_domain = ngx.var.cookie_domain == "" and ngx.var.cookie_domain or nil
+local cookie_domain = ngx.var.cookie_domain ~= "" and ngx.var.cookie_domain or nil
 
 function remove_jwt_expiry(aaf_jwt)
   ngx.log(ngx.NOTICE, aaf_jwt)
@@ -54,6 +54,7 @@ if username ~= nil then
   ngx.req.set_header("X-Remote-User", username)
   return
 else
+  ngx.header['Cache-Control'] = "must-revalidate";
   local method = ngx.req.get_method()
   if method == "GET" or method == "HEAD" then
     return ngx.redirect(rapidaaf_url)
