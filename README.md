@@ -1,6 +1,6 @@
 # rapidaaf-reverse-proxy
 
-[![Build Status](https://travis-ci.org/dit4c/rapidaaf-reverse-proxy.svg?branch=master)](https://travis-ci.org/uq-eresearch/rapidaaf-reverse-proxy)
+[![Build Status](https://travis-ci.org/uq-eresearch/rapidaaf-reverse-proxy.svg?branch=master)](https://travis-ci.org/uq-eresearch/rapidaaf-reverse-proxy)
 
 Container image for authenticating HTTP traffic via RapidAAF & reverse proxying. After authenticating, it sets `X-Remote-User` with the username, and adds a HTTP Basic `Authorization` header with the username and a blank password.
 
